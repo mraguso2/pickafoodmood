@@ -14,7 +14,9 @@ const Layout = ({ className, children, page }) => (
       />
       <script
         type="text/javascript"
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPqZGf7DZc0RstbU-LUnndaN_muGiCjPA&libraries=places"
+        src={`https://maps.googleapis.com/maps/api/js?key=${
+          process.env.GOOGLEMAP_TOKEN
+        }&libraries=places`}
       />
     </Head>
     {/* <HeaderWithAuth /> */}
