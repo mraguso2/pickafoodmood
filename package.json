@@ -1,0 +1,28 @@
+{
+  "name": "food-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "bcrypt": "^4.0.1",
+    "cookie": "^0.4.0",
+    "jsonwebtoken": "^8.5.1",
+    "md5": "^2.2.1",
+    "mongodb": "^3.5.5",
+    "mongoose": "^5.9.6",
+    "mongoose-mongodb-errors": "0.0.2",
+    "next": "^9.4.0",
+    "prop-types": "^15.7.2",
+    "qs": "^6.9.3",
+    "react": "^16.13.1",
+    "react-datepicker": "^2.14.1",
+    "react-dom": "^16.13.1",
+    "react-map-gl": "^5.2.3",
+    "slug": "^2.1.1",
+    "validator": "^12.2.0"
+  }
+}
