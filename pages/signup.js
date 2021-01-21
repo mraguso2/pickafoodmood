@@ -124,7 +124,7 @@ const Signup = () => {
   };
 
   return (
-    <Layout className="bg-gray-100 h-full" page="Sign In">
+    <Layout className="bg-gray-100 h-full" page="Sign Up">
       <div className="mt-12">
         <h1 className="xtraHeadingText flex justify-center text-gray-800 text-4xl m-4 mb-2 tracking-wide">
           Create an Account
@@ -263,10 +263,9 @@ const Signup = () => {
             </div>
             <div className="flex items-center justify-center">
               <button
-                className={`bg-nxtBlue text-white mt-4 py-2 px-4 rounded focus:outline-none focus:shadow-outline buttText ${
-                  isDisabled ? 'disabled' : ''
-                }`}
+                className="bg-nxtBlue text-white mt-4 py-2 px-4 rounded focus:outline-none focus:shadow-outline buttText"
                 type="submit"
+                disabled={isDisabled}
               >
                 Create an Account
               </button>

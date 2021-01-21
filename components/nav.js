@@ -24,6 +24,10 @@ const navLinks = {
     {
       title: 'Add Location',
       address: '/addlocation'
+    },
+    {
+      title: 'Account',
+      address: '/account'
     }
   ]
 };

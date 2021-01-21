@@ -1,13 +1,13 @@
 import { useState, useRef } from 'react';
 import Router from 'next/router';
-import Layout from '../components/Layout';
+import Layout from '../../components/Layout';
 import {
   prevDefaultOnEnter,
   passwordValidator,
   check,
   crissCross,
   FailedAttempt
-} from '../components/helpers';
+} from '../../components/helpers';
 
 const Profile = () => {
   const [isDisabled, setDisabled] = useState(false);

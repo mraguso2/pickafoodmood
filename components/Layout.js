@@ -19,13 +19,17 @@ const Layout = ({ className, children, page }) => (
         }&libraries=places`}
       />
     </Head>
-    {/* <HeaderWithAuth /> */}
-    <HeaderNoAuth />
+    <HeaderWithAuth />
+    {/* <HeaderNoAuth /> */}
     <main>{children}</main>
     <style jsx>{`
       :global(body) {
         margin: 0;
         font-family: -apple-system, BlinkMacSystemFont, Avenir Next, Avenir, Helvetica, sans-serif;
+      }
+      :global(button.disabled) {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
       main {
         min-height: 100vh;
