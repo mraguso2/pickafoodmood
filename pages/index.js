@@ -54,7 +54,7 @@ export async function getServerSideProps(context) {
     // const { cookie } = context.req.headers;
     const { headers: { cookie } = {} } = context.req;
 
-    const res = await fetch(`http://localhost:3000/api/authenticated`, {
+    const res = await fetch(`${process.env.RESTURL}/authenticated`, {
       headers: {
         cookie
       }
@@ -64,10 +64,13 @@ export async function getServerSideProps(context) {
 
     // user is not logged in - who dis?
     if (res.status === 401 && context.req && data.action === 'error') {
-      context.res.writeHead(302, {
-        Location: `/login`
-      });
-      context.res.end();
+      return {
+        // redirect returned from getServerSideProps
+        redirect: {
+          destination: '/login',
+          permanent: false
+        }
+      };
     }
 
     return { props: {} };
@@ -76,28 +79,5 @@ export async function getServerSideProps(context) {
     return { props: {} };
   }
 }
-
-// export async function getServerSideProps(context) {
-//   const { cookie } = context.req.headers;
-//   try {
-//     const res = await fetch(`http://localhost:3000/api/locations`, {
-//       headers: {
-//         cookie
-//       }
-//     });
-
-//     // if (res.status === 401) {
-//     //   Router.replace('/signin');
-//     //   return;
-//     // }
-
-//     const data = await res.json();
-//     return { props: { locations: data } };
-//   } catch (err) {
-//     // TODO redirect to 404 location not find
-//     console.error('Error: ', err);
-//     return { props: {} };
-//   }
-// }
 
 export default Home;

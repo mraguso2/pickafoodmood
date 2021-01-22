@@ -173,8 +173,9 @@ const Login = () => {
 
 export async function getServerSideProps(context) {
   try {
-    const { cookie } = context.req.headers;
-    const res = await fetch(`http://localhost:3000/api/authenticated`, {
+    const { headers: { cookie } = {} } = context.req;
+
+    const res = await fetch(`${process.env.RESTURL}/authenticated`, {
       headers: {
         cookie
       }

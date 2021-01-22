@@ -1,4 +1,5 @@
 import qs from 'qs';
+import { hash } from 'bcrypt';
 import User from '../../Models/User';
 import connectToDb from './db';
 import catchErrors from '../../middleware/withErrorHandler';
@@ -26,26 +27,34 @@ const reset = async (req, res) => {
 
     case 'POST': {
       // post data from db
-      const parsedData = qs.parse(req.body);
+      const { resetToken, password } = qs.parse(req.body);
 
-      // 1. See if a user with that email exists
-      const user = await User.findOne({ email: parsedData.email });
+      // See if a user with that token exists and not past expiry date
+      const user = await User.findOne({
+        resetPasswordToken: resetToken,
+        resetPasswordExpires: { $gt: Date.now() } // check the token is greater than now - $gt mongo fn
+      });
 
+      // No user found
       if (!user) {
-        res.json({ action: 'success', message: 'You have been emailed a password reset link.' });
+        res.json({ action: 'error', message: 'Password reset is invalid or has expired' });
         return res.end();
       }
 
-      // 2. Set reset tokens and expiry on their account - values saved to user model
-      user.resetPasswordToken = crypto.randomBytes(20).toString('hex');
-      user.resetPasswordExpires = Date.now() + 3600000; // 1 hour from now
-      await user.save();
+      hash(password, 11, async (err, hashed) => {
+        // Store hash in your password DB.
+        // Save user with new password and clear token and expiry date
+        user.password = hashed;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
 
-      // 3. send them an email with the token
-      const resetURL = `http://${req.headers.host}/account/reset/${user.resetPasswordToken}`;
-      console.log(resetURL);
-      res.json({ action: 'success', message: 'You have been emailed a password reset link.' });
-      return res.end();
+        await user.save();
+
+        res.json({ action: 'success', message: 'Your password has been successfully updated' });
+        return res.end();
+      });
+
+      break;
     }
     default: {
       res.setHeader('Allow', ['POST']);

@@ -1,8 +1,5 @@
 const withErrorHandler = fn => async (req, res) => {
   try {
-    // return new Promise(resolve => {
-    //   fn(req, res, resolve);
-    // });
     return await fn(req, res);
   } catch (error) {
     if (error instanceof Error) {

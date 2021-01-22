@@ -28,8 +28,12 @@ const forgot = async (req, res) => {
 
       // 3. send them an email with the token
       const resetURL = `http://${req.headers.host}/account/reset/${user.resetPasswordToken}`;
-      // console.log(resetURL);
-      res.json({ action: 'success', message: 'You have been emailed a password reset link.' });
+      console.log(resetURL);
+      res.json({
+        action: 'success',
+        message: 'You have been emailed a password reset link.',
+        url: `/login`
+      });
       return res.end();
     }
     default: {

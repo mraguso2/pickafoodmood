@@ -84,3 +84,12 @@ export const crissCross = (
     `}</style>
   </svg>
 );
+
+export const checkAuth = async context => {
+  const { cookie } = context.req.headers;
+  const res = await fetch(`http://localhost:3000/api/locations`, {
+    headers: {
+      cookie
+    }
+  });
+};

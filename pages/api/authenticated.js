@@ -6,6 +6,7 @@ const authenticated = async (req, res) => {
   switch (method) {
     case 'GET': {
       // go through the auth middleware
+      console.log('in authenticed GET');
       res.json({ action: 'success', message: 'User is logged in', user: req.user });
       res.end();
       break;

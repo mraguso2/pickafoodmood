@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react';
 import Link from 'next/link';
-import Router from 'next/router';
+import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 
 const Forgot = () => {
+  const router = useRouter();
   const [userEmail, setEmail] = useState({});
   const [isDisabled, setDisabled] = useState(false);
 
@@ -45,7 +46,9 @@ const Forgot = () => {
       if (res.action === 'success') {
         setDisabled(false);
         // send to the homepage
-        Router.push('/');
+        window.location = 'http://localhost:3000/login';
+        // router push is not working for some reason
+        // router.push('../login');
       }
       // welcome message on homepage
       // check if user is logged in and if so do not display signin or signup page
