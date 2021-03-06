@@ -4,6 +4,7 @@ import Location from '../../../Models/Location';
 import connectToDb from '../db';
 // import catchErrors from '../../../middleware/withErrorHandler';
 import middleware from '../../../middleware/withMiddleware';
+import { checkAuthFn } from '../authenticated';
 
 const flashy = (type, text) => ({
   flash: {
@@ -79,3 +80,25 @@ const locationForm = async (req, res) => {
 };
 
 export default middleware(locationForm);
+
+// Rah Rah Rah Rewrite it as FN instead of Api call
+// Get one Locations
+export const getOneLocation = async (cookie, slug) => {
+  await connectToDb();
+
+  // check if user is logged in
+  const authorizer = checkAuthFn(cookie);
+  if (authorizer.status === 401) return authorizer;
+
+  const oneLocation = await Location.findOne({ slug });
+  const cerealizedLocation = JSON.stringify(oneLocation);
+
+  return {
+    status: 200,
+    data: {
+      action: 'success',
+      message: `${oneLocation ? 'One location found' : 'No location found'}`
+    },
+    locations: cerealizedLocation
+  };
+};

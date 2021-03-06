@@ -3,8 +3,9 @@ import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import NProgress from 'nprogress';
 import 'react-datepicker/dist/react-datepicker.css';
+import { NotificationsProvider, setUpNotifications } from 'reapop';
 import UserContext from '../components/UserContext';
-import FlashWrapper from '../components/FlashWrapper';
+// import FlashWrapper from '../components/FlashWrapper';
 
 // This default export is required in a new `pages/_app.js` file.
 export default function MyApp({ Component, pageProps }) {
@@ -34,11 +35,21 @@ export default function MyApp({ Component, pageProps }) {
     };
   }, []);
 
+  setUpNotifications({
+    defaultProps: {
+      position: 'top-right',
+      dismissible: true,
+      showDismissButton: true,
+      dismissAfter: 4000,
+      singleContainer: false // adding to remove HMR error about server classNames not matching client
+    }
+  });
+
   return (
     <UserContext.Provider value={userValue}>
-      <FlashWrapper>
+      <NotificationsProvider>
         <Component {...pageProps} />
-      </FlashWrapper>
+      </NotificationsProvider>
     </UserContext.Provider>
   );
 }

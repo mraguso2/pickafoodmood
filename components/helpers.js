@@ -1,3 +1,5 @@
+import Modal from './Modal';
+
 export const choices = [
   'Breakfast',
   'Lunch',
@@ -85,11 +87,29 @@ export const crissCross = (
   </svg>
 );
 
-export const checkAuth = async context => {
-  const { cookie } = context.req.headers;
-  const res = await fetch(`http://localhost:3000/api/locations`, {
-    headers: {
-      cookie
-    }
-  });
-};
+export const getOuttaHere = (urlRedirect = '') => ({
+  redirect: {
+    destination: `/login${urlRedirect}`,
+    permanent: false
+  }
+});
+
+export const TrashItButton = ({ name = '', showModal, setModal, id }) => (
+  <div className="flex">
+    <button
+      className="rounded hover:text-red-900 hover:border-red-900 text-red-700 border border-red-700 py-2 px-4 focus:outline-none focus:shadow-outline buttText"
+      type="button"
+      onClick={() => setModal(true)}
+    >
+      Delete Location
+    </button>
+    {showModal ? <Modal name={name} showMe={showModal} setModal={setModal} id={id} /> : ''}
+    <style jsx>{`
+      @media only screen and (max-device-width: 480px) {
+        .buttText {
+          font-size: 14px;
+        }
+      }
+    `}</style>
+  </div>
+);

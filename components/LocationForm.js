@@ -1,36 +1,12 @@
-import { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import StarRating from './StarRating';
-import { choices } from './helpers.js';
-import Modal from './Modal';
-
-const prevDefaultOnEnter = e => {
-  if (e.keyCode === 13) e.preventDefault();
-};
-
-const TrashItButton = ({ name = '', showModal, setModal, id }) => (
-  <div className="flex">
-    <button
-      className="rounded hover:text-red-900 hover:border-red-900 text-red-700 border border-red-700 py-2 px-4 focus:outline-none focus:shadow-outline buttText"
-      type="button"
-      onClick={() => setModal(true)}
-    >
-      Delete Location
-    </button>
-    {showModal ? <Modal name={name} showMe={showModal} setModal={setModal} id={id} /> : ''}
-    <style jsx>{`
-      @media only screen and (max-device-width: 480px) {
-        .buttText {
-          font-size: 14px;
-        }
-      }
-    `}</style>
-  </div>
-);
+import { choices, prevDefaultOnEnter, TrashItButton } from './helpers.js';
 
 const LocationForm = ({ location = {} }) => {
   const [starRating, setRating] = useState(location.rating || 0);
   const [tagsPicked, setTags] = useState(location.tags || []);
+  const [visited, setVisited] = useState(location.visited || 'Yes');
   const [visitDay, setvisitDay] = useState(
     (location.visitDate && new Date(location.visitDate)) || new Date()
   );
@@ -42,7 +18,7 @@ const LocationForm = ({ location = {} }) => {
   const lngInput = useRef(null);
   const ratingInput = useRef(null);
   const descInput = useRef();
-  const visitDayInput = useRef();
+  const visitDayInput = useRef(null);
 
   const setParam = location._id ? `/${location._id}` : '';
 
@@ -57,6 +33,14 @@ const LocationForm = ({ location = {} }) => {
   const handleStarClick = index => {
     ratingInput.current.value = index;
     return setRating(index);
+  };
+
+  const handleVisitedBooRadio = e => {
+    const visitedFlag = e.target.value;
+    const otherOption = visitedFlag === 'No' ? undefined : new Date();
+
+    setvisitDay((location.visitDate && new Date(location.visitDate)) || otherOption);
+    setVisited(visitedFlag);
   };
 
   const handleDateChange = date => {
@@ -85,9 +69,21 @@ const LocationForm = ({ location = {} }) => {
     }
 
     // set the form to values returned from DB
-    const { location: loc, name, rating, description, visitDate, tags } = location;
+    const {
+      location: loc,
+      name,
+      rating,
+      description,
+      visitDate,
+      visited: visitYet,
+      tags
+    } = location;
 
-    const formattedDate = new Date(visitDate);
+    if (visitDate) {
+      const formattedDate = new Date(visitDate);
+      visitDayInput.current.value = formattedDate;
+      setvisitDay(formattedDate);
+    }
 
     addressInput.current.value = loc.address;
     nameInput.current.value = name;
@@ -95,11 +91,10 @@ const LocationForm = ({ location = {} }) => {
     lngInput.current.value = loc.coordinates && loc.coordinates[0];
     ratingInput.current.value = rating;
     descInput.current.value = description;
-    visitDayInput.current.value = formattedDate;
 
     setRating(rating);
-    setvisitDay(formattedDate);
     setTags(tags);
+    // setVisited(visitYet);
   }, []);
 
   // google places dropdown
@@ -135,7 +130,7 @@ const LocationForm = ({ location = {} }) => {
               name="location[address]"
               ref={addressInput}
               onKeyDown={e => prevDefaultOnEnter(e)}
-              placeholder="Nick's Pizza, 8 Cheesy Way"
+              placeholder="Mike's Pizza, 8 Cheesy Way"
               required
             />
           </label>
@@ -192,28 +187,72 @@ const LocationForm = ({ location = {} }) => {
               </label>
             </div>
           </div>
-          <label
-            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-6"
-            htmlFor="visitDay"
-          >
-            Visit Date
-            <input
-              className="hidden shadow appearance-none w-full text-sm bg-gray-200 text-gray-700 border border-gray-200 rounded py-2 px-3 mt-1 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-              type="text"
-              id="visitDayId"
-              name="visitDate"
-              ref={visitDayInput}
-            />
-            <div>
-              <DatePicker
-                className="shadow appearance-none w-full text-sm bg-gray-200 text-gray-700 border border-gray-200 rounded py-2 px-3 mt-1 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                name="visitDate1"
-                required
-                selected={visitDay}
-                onChange={handleDateChange}
+          <div className="w-auto flex items-center justify-around">
+            <label
+              className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-6"
+              htmlFor="visited"
+            >
+              Visited?
+              <div className="flex mt-2">
+                <div className="flex items-center mr-3">
+                  <label className="flex items-center justify-center" htmlFor="visitedYes">
+                    <input
+                      className="form-radio h-4 w-4 text-gray-600"
+                      id="visitedYes"
+                      type="radio"
+                      name="visited"
+                      value="Yes"
+                      checked={visited === 'Yes'}
+                      onChange={e => handleVisitedBooRadio(e)}
+                    />
+                    <span className="ml-2">Yes</span>
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <label className="flex items-center justify-center" htmlFor="visitedNo">
+                    <input
+                      className="form-radio h-4 w-4 text-gray-600"
+                      id="visitedNo"
+                      type="radio"
+                      name="visited"
+                      value="No"
+                      checked={visited !== 'Yes'}
+                      onChange={e => handleVisitedBooRadio(e)}
+                    />
+                    <span className="ml-2">No</span>
+                  </label>
+                </div>
+              </div>
+            </label>
+            <label
+              className={`block relative uppercase tracking-wide text-gray-700 text-xs font-bold mb-6 transition-opacity duration-200 ${
+                visited !== 'Yes' ? 'notAvail opacity-0 zBack' : 'opacity-100'
+              }`}
+              htmlFor="visitDay"
+              tabIndex={visited === 'Yes' ? 0 : -1}
+            >
+              Visit Date
+              <input
+                className={`hidden shadow appearance-none w-32 text-sm bg-gray-200 text-gray-700 border border-gray-200 rounded py-2 px-3 mt-1 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
+                  visited !== 'Yes' ? 'notAvail' : ''
+                }`}
+                type="text"
+                id="visitDayId"
+                name="visitDate"
+                ref={visitDayInput}
+                defaultValue={visitDay}
               />
-            </div>
-          </label>
+              <div className={`relative ${visited === 'Yes' ? '' : 'invisible'}`}>
+                <div className="absolute appearance-none w-32 h-full rounded py-2 px-3 mt-1" />
+                <DatePicker
+                  className="shadow appearance-none w-32 text-sm bg-gray-200 text-gray-700 border border-gray-200 rounded py-2 px-3 mt-1 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  name="visitDate1"
+                  selected={visitDay}
+                  onChange={handleDateChange}
+                />
+              </div>
+            </label>
+          </div>
           <label
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-6"
             htmlFor="description"
@@ -226,7 +265,6 @@ const LocationForm = ({ location = {} }) => {
               type="text"
               name="description"
               placeholder="Delish - got the pizzza"
-              required
               ref={descInput}
             />
           </label>
@@ -281,7 +319,7 @@ const LocationForm = ({ location = {} }) => {
             ))}
           </div>
         </div>
-        <div className="flex items-center justify-between">
+        <div className={`flex items-center ${setParam ? 'justify-between' : 'justify-center'}`}>
           <button
             className="bg-nxtBlue text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline buttText"
             type="submit"
@@ -336,6 +374,15 @@ const LocationForm = ({ location = {} }) => {
         }
         .tags {
           font-weight: 600;
+        }
+        .notAvail {
+          cursor: not-allowed;
+        }
+        .zBack {
+          z-index: -10;
+        }
+        .opacity-50 {
+          opacity: 0.5;
         }
         input[type='checkbox']:checked + label {
           background-color: #434190;

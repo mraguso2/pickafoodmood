@@ -1,9 +1,10 @@
+import React from 'react';
 import Link from 'next/link';
 import StarRating from './StarRating';
 import { choices } from './helpers';
 
 const TagIt = ({ choice, i, tagsPicked, handleTagClick = () => {} }) => (
-  <React.Fragment>
+  <>
     <input
       className="appearance-none"
       type="checkbox"
@@ -19,7 +20,7 @@ const TagIt = ({ choice, i, tagsPicked, handleTagClick = () => {} }) => (
     >
       #{choice}
     </label>
-  </React.Fragment>
+  </>
 );
 
 const LocationCard = ({ location = {} }) => (

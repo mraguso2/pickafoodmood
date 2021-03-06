@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '../../../components/Layout';
 import Flash from '../../../components/Flash';
+import { resetValid } from '../../api/reset';
 import { passwordValidator, check, crissCross, FailedAttempt } from '../../../components/helpers';
 
 const Reset = ({ location = {}, resetToken = '' }) => {
@@ -226,8 +227,6 @@ const Reset = ({ location = {}, resetToken = '' }) => {
             font-size: 14px;
           }
         }
-        @media only screen and (max-device-width: 480px) {
-        }
       `}</style>
     </Layout>
   );
@@ -235,25 +234,23 @@ const Reset = ({ location = {}, resetToken = '' }) => {
 
 export async function getServerSideProps(context) {
   try {
-    // api call to find out if link is active
-    const res = await fetch(`http://localhost:3000/api/reset?t=${context.params.token}`);
+    const { token } = context.params;
+    const result = await resetValid(token);
 
-    const { action = '' } = await res.json();
-
-    // Not Active -- send to login page
-    if (action === 'error' || !action) {
-      context.res.writeHead(302, {
-        Location: `/login`
-      });
-      context.res.end();
-      return { props: { location: 'Reset Password' } };
+    if (result.action === 'error') {
+      return {
+        // redirect returned from getServerSideProps
+        redirect: {
+          destination: '/',
+          permanent: false
+        }
+      };
     }
 
     // Active send to reset password page
     return { props: { location: 'Reset Password', resetToken: context.params.token } };
   } catch (err) {
     // TODO redirect to 404
-    console.log('in here');
     console.error('Error: ', err);
   }
 }

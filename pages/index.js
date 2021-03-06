@@ -1,7 +1,9 @@
-import React from 'react';
-import Router from 'next/router';
+// import React from 'react';
+import { parse } from 'cookie';
 import Map from '../components/Map';
 import Layout from '../components/Layout';
+import { checkAuthFn } from './api/authenticated';
+import { getOuttaHere } from '../components/helpers';
 
 const Home = ({ locations = [] }) => (
   <Layout page="Home">
@@ -51,19 +53,17 @@ const Home = ({ locations = [] }) => (
 
 export async function getServerSideProps(context) {
   try {
-    // const { cookie } = context.req.headers;
-    const { headers: { cookie } = {} } = context.req;
+    const { headers: { cookie = '' } = {} } = context.req;
 
-    const res = await fetch(`${process.env.RESTURL}/authenticated`, {
-      headers: {
-        cookie
-      }
-    });
+    const cookieObj = parse(cookie);
 
-    const data = await res.json();
+    // no auth cookie - who dis?
+    if (!cookieObj.auth) return getOuttaHere();
+
+    const res = checkAuthFn(cookieObj);
 
     // user is not logged in - who dis?
-    if (res.status === 401 && context.req && data.action === 'error') {
+    if (res.status === 401 && context.req && res.data.action === 'error') {
       return {
         // redirect returned from getServerSideProps
         redirect: {

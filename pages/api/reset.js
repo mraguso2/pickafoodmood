@@ -64,3 +64,23 @@ const reset = async (req, res) => {
 };
 
 export default catchErrors(reset);
+
+// Rah Rah Rah Rewrite it as FN instead of Api call
+// Get one Locations
+export const resetValid = async token => {
+  await connectToDb();
+
+  const user = await User.findOne({
+    resetPasswordToken: token,
+    resetPasswordExpires: { $gt: Date.now() } // check the token is greater than now - $gt mongo fn
+  });
+
+  if (!user) {
+    return { action: 'error', message: 'Password reset is invalid or has expired' };
+  }
+
+  return {
+    status: 200,
+    data: { action: 'success' }
+  };
+};

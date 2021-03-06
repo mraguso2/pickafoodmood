@@ -44,4 +44,5 @@ userSchema.virtual('gravatar').get(function getGravatar() {
 // set options: usernameField to the "email" vs default "username"
 userSchema.plugin(mongodbErrorHandler);
 
-export default mongoose.models.User || mongoose.model('User', userSchema);
+const modelFound = mongoose.models ? mongoose.models.User : false;
+export default modelFound || mongoose.model('User', userSchema);

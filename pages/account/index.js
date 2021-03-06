@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react';
 import Router from 'next/router';
+import { parse } from 'cookie';
 import Layout from '../../components/Layout';
+import { checkAuthFn } from '../api/authenticated';
 import {
   prevDefaultOnEnter,
   passwordValidator,
@@ -110,9 +112,6 @@ const Profile = () => {
         // send to the homepage
         Router.push(`res.url`);
       }
-      // welcome message on homepage
-      // check if user is logged in and if so do not display signin or signup page
-      // check if email is already taken in form
     } catch (err) {
       setDisabled(false);
       setSignupAttempt({
@@ -322,23 +321,18 @@ const Profile = () => {
 
 export async function getServerSideProps(context) {
   try {
-    // const { cookie } = context.req.headers;
-    const { url, headers: { cookie } = {} } = context.req;
-
-    const res = await fetch(`http://localhost:3000/api/authenticated`, {
-      headers: {
-        cookie
-      }
-    });
-
-    const data = await res.json();
-
+    const { headers: { cookie = '' } = {} } = context.req;
+    const cookieObj = parse(cookie);
+    const res = checkAuthFn(cookieObj);
     // user is not logged in - who dis?
-    if (res.status === 401 && context.req && data.action === 'error') {
-      context.res.writeHead(302, {
-        Location: `/login?urlAttempt=${url}`
-      });
-      context.res.end();
+    if (res.status === 401 && context.req && res.data.action === 'error') {
+      return {
+        // redirect returned from getServerSideProps
+        redirect: {
+          destination: `/login`,
+          permanent: false
+        }
+      };
     }
 
     return { props: {} };

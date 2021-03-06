@@ -6,8 +6,7 @@ const Modal = ({ name = 'location', setModal, id = '' }) => {
 
   return (
     <div className="modal-outside p-3">
-      {console.log(id)}
-      <div className="modal bg-white shadow-2xl rounded p-3 m-3">
+      <div className="modal bg-white shadow-2xl rounded p-6 m-3">
         <h3 className="text-center">Are you sure you want to delete {name}?</h3>
         <div className="btn-group flex justify-around">
           <button

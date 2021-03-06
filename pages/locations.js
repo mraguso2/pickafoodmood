@@ -1,9 +1,11 @@
 import { useContext } from 'react';
-import Router from 'next/router';
+import { parse } from 'cookie';
 import Layout from '../components/Layout';
 import LocationCard from '../components/LocationCard';
 import NoLocations from '../components/NoLocations';
 import UserContext from '../components/UserContext';
+import { getAllLocations } from './api/locations/index';
+import { getOuttaHere } from '../components/helpers';
 
 // const AllLocations = ({ locations = [] }) => {
 const AllLocations = props => {
@@ -22,7 +24,7 @@ const AllLocations = props => {
       <div className="flex flex-wrap justify-center w-full">
         <div className="w-full mt-8 mb-8">
           <ul className="flex justify-center flex-wrap">
-            {locations.length >= 1 ? (
+            {locations && locations.length >= 1 ? (
               locations.map(loc => <LocationCard key={loc._id} location={loc} />)
             ) : (
               <NoLocations />
@@ -43,32 +45,26 @@ const AllLocations = props => {
 
 export async function getServerSideProps(context) {
   try {
-    const { cookie } = context.req.headers;
-    const res = await fetch(`http://localhost:3000/api/locations`, {
-      headers: {
-        cookie
-      }
-    });
+    const { url, headers: { cookie = '' } = {} } = context.req;
+    const encodedURL = encodeURI(url);
+    const cookieObj = parse(cookie);
 
-    // client side but not needed with "getServerSideProps"
-    // if (res.status === 401 && !context.req) {
-    //   Router.replace('/signin');
-    //   return;
-    // }
+    if (!cookieObj.auth) return getOuttaHere(encodedURL);
 
-    if (res.status === 401 && context.req) {
-      context.res.writeHead(302, {
-        Location: '/login'
-      });
-      context.res.end();
+    const output = await getAllLocations(cookieObj);
+
+    if (output.status === 401 && context.req) {
+      return getOuttaHere(encodedURL);
     }
 
-    const data = await res.json();
+    const { data = {}, locations = '[]' } = output;
 
     if (data.status === 'error') {
       throw new Error(data.message);
     }
-    return { props: { locations: data } };
+
+    const noCerealizedLocs = JSON.parse(locations);
+    return { props: { locations: noCerealizedLocs || [] } };
   } catch (err) {
     // TODO redirect to 404 location not find
     console.error('Error1: ', err);

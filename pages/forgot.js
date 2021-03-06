@@ -1,7 +1,9 @@
 import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { parse } from 'cookie';
 import Layout from '../components/Layout';
+import { checkAuthFn } from './api/authenticated';
 
 const Forgot = () => {
   const router = useRouter();
@@ -156,5 +158,33 @@ const Forgot = () => {
     </Layout>
   );
 };
+
+export async function getServerSideProps(context) {
+  try {
+    const { headers: { cookie = '' } = {} } = context.req;
+    const cookieObj = parse(cookie); // parse string of cookies
+
+    // no auth cookie - who dis?
+    if (!cookieObj.auth) return { props: {} };
+
+    const res = checkAuthFn(cookieObj);
+
+    // user is authenticated so don't show them LOGIN page
+    if (res.status === 200 && context.req && res.data.action === 'success') {
+      return {
+        // redirect returned from getServerSideProps
+        redirect: {
+          destination: '/',
+          permanent: false
+        }
+      };
+    }
+
+    return { props: {} };
+  } catch (err) {
+    console.error('Error: ', err);
+    return { props: {} };
+  }
+}
 
 export default Forgot;

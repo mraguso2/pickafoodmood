@@ -9,11 +9,11 @@ const locationSchema = new mongoose.Schema({
     trim: true,
     required: 'Please enter a store name!' // instead of Boolean, set the error message if not filled out
   },
-  // author: {
-  //   type: mongoose.Schema.ObjectId,
-  //   ref: 'User',
-  //   required: 'You must supply an author!'
-  // },
+  author: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    required: 'You must supply a user!'
+  },
   description: {
     type: String,
     trim: true
@@ -43,7 +43,12 @@ const locationSchema = new mongoose.Schema({
       required: 'You must supply an address!'
     }
   },
-  visitDate: { type: Date, default: Date.now },
+  visited: {
+    type: String,
+    required: 'You must answer visited question'
+  }, // to allow tracking future vs past locations
+  visitDate: Date,
+  modified: Date,
   creationDate: { type: Date, default: Date.now }
 });
 
@@ -95,4 +100,8 @@ locationSchema.pre('save', async function slugIt(next) {
 // locationSchema.pre('find', autopopulate);
 // locationSchema.pre('findOne', autopopulate);
 
-export default mongoose.models.Location || mongoose.model('Location', locationSchema);
+// export default mongoose.models.Location || mongoose.model('Location', locationSchema);
+
+const modelFound = mongoose.models ? mongoose.models.Location : false;
+
+export default modelFound || mongoose.model('Location', locationSchema);

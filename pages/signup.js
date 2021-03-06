@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react';
 import Router from 'next/router';
+import { parse } from 'cookie';
 import Layout from '../components/Layout';
+import { checkAuthFn } from './api/authenticated';
 import {
   prevDefaultOnEnter,
   passwordValidator,
@@ -321,21 +323,23 @@ const Signup = () => {
 
 export async function getServerSideProps(context) {
   try {
-    const { cookie } = context.req.headers;
-    const res = await fetch(`http://localhost:3000/api/authenticated`, {
-      headers: {
-        cookie
-      }
-    });
+    const { headers: { cookie = '' } = {} } = context.req;
+    const cookieObj = parse(cookie); // parse string of cookies
 
-    const data = await res.json();
-    console.log(data);
-    // user is authenticated so don't show them SIGNUP page
-    if (res.status === 200 && context.req && data.action === 'success') {
-      context.res.writeHead(302, {
-        Location: '/'
-      });
-      context.res.end();
+    // no auth cookie - who dis?
+    if (!cookieObj.auth) return { props: {} };
+
+    const res = checkAuthFn(cookieObj);
+
+    // user is authenticated so don't show them LOGIN page
+    if (res.status === 200 && context.req && res.data.action === 'success') {
+      return {
+        // redirect returned from getServerSideProps
+        redirect: {
+          destination: '/',
+          permanent: false
+        }
+      };
     }
 
     return { props: {} };

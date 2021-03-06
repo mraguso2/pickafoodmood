@@ -1,3 +1,8 @@
+// eslint-disable-next-line spaced-comment
+/*******
+ * Archiving this Flash Logic for now
+ *******/
+
 import { useState, useEffect } from 'react';
 
 const SuccessIcon = () => (

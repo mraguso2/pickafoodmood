@@ -13,7 +13,7 @@ const flashy = (type, text) => ({
   }
 });
 
-const signin = async (req, res) => {
+const login = async (req, res) => {
   await connectToDb().catch(err => new Error(err));
   const { method } = req;
 
@@ -26,7 +26,7 @@ const signin = async (req, res) => {
 
       // validate that user is defined and then check password
       if (!user) {
-        return res.status(200).json({ action: 'error', message: 'Wrong Email or Password' });
+        return res.json({ action: 'error', message: 'Wrong Email or Password' });
       }
 
       const match = await compare(parsedData.password, user.password);
@@ -40,18 +40,18 @@ const signin = async (req, res) => {
           cookie.serialize('auth', jwt, {
             httpOnly: true,
             secure: process.env.NODE_ENV !== 'development',
+            // secure: false,
             sameSite: 'strict',
             maxAge: 604800,
             path: `/`
           })
         );
-        // res.writeHead(302, { Location: `/` });
-        res.json({ action: 'success', message: 'Successful Login', url: `/` });
+        res.json({ action: 'success', message: 'Successful Login', url: `/`, user: claims });
         return res.end();
       }
       // incorrect credentials
       res.json({ action: 'error', message: 'Something went wrong!' });
-
+      res.end();
       break;
     }
     default: {
@@ -61,5 +61,5 @@ const signin = async (req, res) => {
   }
 };
 
-export default catchErrors(signin);
+export default catchErrors(login);
 // export default signin;

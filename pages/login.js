@@ -1,8 +1,10 @@
-import { useRef, useState, useContext } from 'react';
+import { useRef, useState, useContext, useEffect } from 'react';
 import Link from 'next/link';
-import Router, { useRouter } from 'next/router';
+import { useRouter } from 'next/router';
+import { parse } from 'cookie';
 import Layout from '../components/Layout';
 import { prevDefaultOnEnter, FailedAttempt } from '../components/helpers';
+import { checkAuthFn } from './api/authenticated';
 import UserContext from '../components/UserContext';
 
 const Login = () => {
@@ -11,6 +13,7 @@ const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [failedLogin, setLoginAttempt] = useState({ status: false, message: '' });
   const [isDisabled, setDisabled] = useState(false);
+  const [isLoggedIn, setLoggedIn] = useState(false);
 
   const { user, setUser } = useContext(UserContext);
 
@@ -19,9 +22,16 @@ const Login = () => {
   const form = useRef(null);
 
   const handleChange = e => {
-    // console.log(emailInput.current.value);
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  useEffect(() => {
+    // send to the homepage or urlattempt
+    // const gotoURL = urlAttempt || res.url;
+    if (isLoggedIn) {
+      router.push(`${urlAttempt || '/'}`);
+    }
+  }, [isLoggedIn]);
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -31,8 +41,10 @@ const Login = () => {
       const checksOut = await fetch('/api/login', {
         method: 'POST',
         headers: {
+          Accept: 'application/json, text/plain, */*',
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(data)
       });
 
@@ -40,9 +52,9 @@ const Login = () => {
 
       // handle error logging in
       if (res.action === 'error') {
-        // form.current.reset();
         setDisabled(false);
-        setUser('test');
+        setUser('');
+        pwInput.current.value = '';
 
         // show error logging in
         return setLoginAttempt({
@@ -54,14 +66,14 @@ const Login = () => {
       // handle successful login
       if (res.action === 'success') {
         setDisabled(false);
-        // send to the homepage
-        Router.push(`${urlAttempt || res.url}`);
+        setUser(res.user);
+        setLoggedIn(true);
+        // router.push('/', undefined, { shallow: true });
+        // router.reload();
       }
-      // welcome message on homepage
-      // check if user is logged in and if so do not display signin or signup page
-      // disable submit button after clicked - enable once response
     } catch (err) {
       setDisabled(false);
+      setUser('');
       setLoginAttempt({
         status: true,
         message: 'Something went wrong. Please try again.'
@@ -74,7 +86,7 @@ const Login = () => {
     <Layout className="bg-gray-100 h-full" page="Login">
       <div className="mt-12">
         <h1 className="xtraHeadingText flex justify-center text-gray-800 text-4xl m-4 mb-2 tracking-wide">
-          Login {user}
+          Login
         </h1>
         {failedLogin.status ? <FailedAttempt message={failedLogin.message} /> : ''}
         <div className="flex justify-center w-full">
@@ -173,22 +185,23 @@ const Login = () => {
 
 export async function getServerSideProps(context) {
   try {
-    const { headers: { cookie } = {} } = context.req;
+    const { headers: { cookie = '' } = {} } = context.req;
+    const cookieObj = parse(cookie); // parse string of cookies
 
-    const res = await fetch(`${process.env.RESTURL}/authenticated`, {
-      headers: {
-        cookie
-      }
-    });
+    // no auth cookie - who dis?
+    if (!cookieObj.auth) return { props: {} };
 
-    const data = await res.json();
+    const res = checkAuthFn(cookieObj);
 
     // user is authenticated so don't show them LOGIN page
-    if (res.status === 200 && context.req && data.action === 'success') {
-      context.res.writeHead(302, {
-        Location: '/'
-      });
-      context.res.end();
+    if (res.status === 200 && context.req && res.data.action === 'success') {
+      return {
+        // redirect returned from getServerSideProps
+        redirect: {
+          destination: '/',
+          permanent: false
+        }
+      };
     }
 
     return { props: {} };
