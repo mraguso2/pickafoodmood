@@ -27,20 +27,19 @@ const locations = async (req, res) => {
 
       const newLocation = await new Location(updatedData).save();
       // res.json(newLocation);
-      // const flashIt = JSON.stringify(flashy('success', 'New Location Created'));
-      // res.setHeader(
-      //   'Set-Cookie',
-      //   cookie.serialize('flash', flashIt, {
-      //     httpOnly: false,
-      //     secure: process.env.NODE_ENV !== 'development',
-      //     // sameSite: 'strict',
-      //     maxAge: 60,
-      //     path: `/`
-      //     // path: `/p/${updatedData.slug}`
-      //   })
-      // );
-      // console.log(process.ENV);
-      res.writeHead(200, { Location: `http://localhost:3000/p/${newLocation.slug}` });
+      const flashIt = JSON.stringify(flashy('success', 'New Location Created'));
+      res.setHeader(
+        'Set-Cookie',
+        cookie.serialize('flash', flashIt, {
+          httpOnly: false,
+          secure: process.env.NODE_ENV !== 'development',
+          // sameSite: 'strict',
+          maxAge: 60,
+          path: `/`
+          // path: `/p/${updatedData.slug}`
+        })
+      );
+      res.writeHead(302, { Location: `/p/${newLocation.slug}` });
       res.end();
       break;
     }

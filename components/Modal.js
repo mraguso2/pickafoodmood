@@ -1,6 +1,6 @@
 const Modal = ({ name = 'location', setModal, id = '' }) => {
   const deleteLocation = async locId => {
-    const res = await fetch(`http://localhost:3000/api/locations/${locId}`, { method: 'DELETE' });
+    const res = await fetch(`/api/locations/${locId}`, { method: 'DELETE' });
     console.log(res);
   };
 

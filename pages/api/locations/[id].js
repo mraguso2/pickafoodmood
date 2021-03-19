@@ -67,9 +67,9 @@ const locationForm = async (req, res) => {
     case 'DELETE': {
       // get one location from db
       await Location.deleteOne({ _id: id });
-      res.json({ message: 'Location successfully deleted' });
-      // res.writeHead(302, { Location: `/locations` });
-      // res.end();
+      // res.json({ message: 'Location successfully deleted' });
+      res.writeHead(302, { Location: `/locations` });
+      res.end();
       break;
     }
     default: {
