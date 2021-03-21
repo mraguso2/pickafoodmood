@@ -1,7 +1,22 @@
+import { useRouter } from 'next/router';
+
 const Modal = ({ name = 'location', setModal, id = '' }) => {
+  const router = useRouter();
+
   const deleteLocation = async locId => {
-    const res = await fetch(`/api/locations/${locId}`, { method: 'DELETE' });
-    console.log(res);
+    try {
+      const deleteIt = await fetch(`/api/locations/${locId}`, { method: 'DELETE' });
+      const res = await deleteIt.json();
+      // handle successful login
+      if (res.action === 'success') {
+        // ~~TODO~~
+        // Add Notification that location was deleted on router push
+        console.log('Location successfully deleted');
+        router.push(`${res.url}`);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (

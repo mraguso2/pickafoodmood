@@ -55,7 +55,7 @@ const locationForm = async (req, res) => {
           httpOnly: false,
           secure: process.env.NODE_ENV !== 'development',
           // sameSite: 'strict',
-          maxAge: 60,
+          maxAge: 120,
           path: `/`
           // path: `/p/${updatedLocation.slug}`
         })
@@ -67,8 +67,7 @@ const locationForm = async (req, res) => {
     case 'DELETE': {
       // get one location from db
       await Location.deleteOne({ _id: id });
-      // res.json({ message: 'Location successfully deleted' });
-      res.writeHead(302, { Location: `/locations` });
+      res.json({ action: 'success', message: 'Location successfully deleted', url: `/locations` });
       res.end();
       break;
     }
