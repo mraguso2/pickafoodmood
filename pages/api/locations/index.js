@@ -62,7 +62,8 @@ export const getAllLocations = async cookie => {
   const authorizer = checkAuthFn(cookie);
   if (authorizer.status === 401) return authorizer;
 
-  const allLocations = await Location.find();
+  const userId = authorizer.user.sub; // should have a better fallback plan
+  const allLocations = await Location.find({ author: userId });
   const cerealizedLocs = JSON.stringify(allLocations);
 
   return {

@@ -82,7 +82,7 @@ locationSchema.pre('save', async function slugIt(next) {
 
   // find other stores that have same slugs mike, mike-1, mike-2
   const slugRegEx = new RegExp(`^(${this.slug})((-[0-9]*$)?)$`, 'i');
-  const placesWithSlug = await this.constructor.find({ slug: slugRegEx });
+  const placesWithSlug = await this.constructor.find({ slug: slugRegEx, author: this._id });
 
   if (placesWithSlug.length) {
     this.slug = `${this.slug}-${placesWithSlug.length + 1}`;
