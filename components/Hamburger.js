@@ -58,7 +58,7 @@ const Hamburger = ({ isActive = false, setActive = () => {} }) => {
           }
 
           .hamburger-box {
-            width: 35px;
+            width: 30px;
             height: 24px;
             display: inline-block;
             position: relative;
@@ -72,8 +72,8 @@ const Hamburger = ({ isActive = false, setActive = () => {} }) => {
           .hamburger-inner,
           .hamburger-inner::before,
           .hamburger-inner::after {
-            width: 35px;
-            height: 4px;
+            width: 30px;
+            height: 3px;
             background-color: #2b4365;
             border-radius: 4px;
             position: absolute;

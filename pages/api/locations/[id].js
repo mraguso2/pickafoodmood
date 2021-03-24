@@ -22,8 +22,12 @@ const locationForm = async (req, res) => {
 
   switch (method) {
     case 'GET': {
+      if (!req.user) {
+        res.writeHead(302, { Location: `/` });
+        return res.end();
+      }
       // get one location from db
-      const oneLocation = await Location.findOne({ slug: id });
+      const oneLocation = await Location.findOne({ slug: id, author: req.user.sub });
       if (!oneLocation) {
         res.json({
           action: 'error',
@@ -40,11 +44,20 @@ const locationForm = async (req, res) => {
       const parsedData = qs.parse(req.body);
       parsedData.location.type = 'Point';
 
-      const updatedLocation = await Location.findOneAndUpdate({ _id: id }, parsedData, {
-        new: true, // return the new store instead of the old one
-        runValidators: true
-        // setDefaultsOnInsert: true - this line would allow us to remove setting the location type above
-      }).exec();
+      if (!req.user) {
+        res.writeHead(302, { Location: `/` });
+        return res.end();
+      }
+
+      const updatedLocation = await Location.findOneAndUpdate(
+        { _id: id, author: req.user.sub },
+        parsedData,
+        {
+          new: true, // return the new store instead of the old one
+          runValidators: true
+          // setDefaultsOnInsert: true - this line would allow us to remove setting the location type above
+        }
+      ).exec();
       const flashIt = JSON.stringify(flashy('success', 'Location Updated'));
       // console.log({ flashIt });
       // res.json({ updatedLocation, flashIt });
@@ -65,8 +78,12 @@ const locationForm = async (req, res) => {
       break;
     }
     case 'DELETE': {
+      if (!req.user) {
+        res.writeHead(302, { Location: `/` });
+        return res.end();
+      }
       // get one location from db
-      await Location.deleteOne({ _id: id });
+      await Location.deleteOne({ _id: id, author: req.user.sub });
       res.json({ action: 'success', message: 'Location successfully deleted', url: `/locations` });
       res.end();
       break;
@@ -89,7 +106,8 @@ export const getOneLocation = async (cookie, slug) => {
   const authorizer = checkAuthFn(cookie);
   if (authorizer.status === 401) return authorizer;
 
-  const oneLocation = await Location.findOne({ slug });
+  const userId = authorizer.user.sub; // should have a better fallback plan
+  const oneLocation = await Location.findOne({ slug, author: userId });
   const cerealizedLocation = JSON.stringify(oneLocation);
 
   return {
